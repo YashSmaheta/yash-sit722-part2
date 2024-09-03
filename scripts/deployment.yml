@@ -1,0 +1,39 @@
+# Write Kubernetes Deployment Script
+apiVersion: apps/v1 # specifies the API version of kubernetes
+kind: Deployment # specifies the resource being defined is a Kubernetes Deployment
+metadata:
+  name: book-catalog # specifies data about the deployment.
+spec: # specifies the desired state and configuration for the deployment.
+  replicas: 3 # specifies the number of pod replicas to be maintained by the deployment.
+  selector: # identify which pods are managed by this deployment.
+    matchLabels: # uses label to select the pods
+      app: book-catalog # label selector matches pods with the label app
+  template: # defines pod template that is being used to create the pods
+    metadata: # contains metadata for the pods created by the deployment
+      labels: 
+        app: book-catalog # label for the pods
+    spec: # specifies the configuration for the pods.
+      containers: # lists the container that will run inside the pods.
+      - name: book-catalog # name of the container
+        image: book_catalogue:latest # specifies the docker image for the container
+        imagePullPolicy: IfNotPresent
+
+        ports: # container ports that is being exposed
+        - containerPort: 8000
+        env: # defines environment variables for the container
+        - name: DATABASE_URL # name of the variable
+          value: "postgresql://book_catalogue_user:QUUBSRR6Cu7crIQvDjYKQZhoNsIOpqEK@dpg-crbg69tds78s73dfaqt0-a.oregon-postgres.render.com/book_catalogue"
+--- # being used as a seperator for multiple kubernetes resources in same file
+apiVersion: v1 # specifies the api version for the service resources.
+kind: Service #  Indicates that the resource being defined is a Kubernetes Service, which provides networking for the Pods. 
+metadata: # contains metadata about the service
+  name: book-catalog-service # name of the service
+spec: # specifies the desired state and configuration for the service 
+  selector: #Defines how to select which Pods the Service will route traffic to
+    app: book-catalog
+  ports: 
+    - protocol: TCP #Specifies that the service uses the TCP protocol.
+      port: 8000 # exposes port 8000 on the service
+      targetPort: 8000 # route traffic to port 8000 on the selected pods.
+  type: LoadBalancer # specifies the service type here it is LoadBalancer
+  # which will provision an external IP address to access the service.
